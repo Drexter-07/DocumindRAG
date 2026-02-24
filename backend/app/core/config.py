@@ -14,9 +14,14 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str = "5432"
     POSTGRES_DB: str = "documind"
 
-    # Computed Property for SQLAlchemy URL
     @property
     def DATABASE_URL(self) -> str:
+        # If Render or another platform provides a full DATABASE_URL, use it directly
+        env_db_url = os.environ.get("DATABASE_URL")
+        if env_db_url:
+            return env_db_url
+        
+        # Otherwise, fall back to constructing it from individual variables (for local Docker)
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     # AI Config (We will use this later)
