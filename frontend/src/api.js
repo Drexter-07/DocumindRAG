@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance pointing to your FastAPI URL
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1', 
+  baseURL: (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL + '/api/v1' : 'http://127.0.0.1:8000/api/v1'),
   headers: {
     'Content-Type': 'application/json',
     // 1. DEFAULT USER: We pretend to be a Senior Dev by default so we can test everything
@@ -19,7 +19,6 @@ export const uploadPDF = async (file) => {
   // 2. UPLOAD HEADER: Explicitly send header here too, just in case
   const response = await api.post('/upload', formData, {
     headers: { 
-        'Content-Type': 'multipart/form-data',
         'X-Test-Email': 'senior@documind.com'
     },
   });

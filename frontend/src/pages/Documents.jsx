@@ -63,7 +63,7 @@ export const Documents = () => {
         },
       });
       
-      setUploadProgress(`Success! Processed ${res.data.chunks_processed} chunks.`);
+      setUploadProgress(`Success! Processed ${res.data.data.chunks_processed || 'all'} chunks.`);
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       
@@ -74,7 +74,17 @@ export const Documents = () => {
       setTimeout(() => setUploadProgress(''), 3000);
     } catch (err) {
       console.error('Upload failed:', err);
-      setError(err.response?.data?.detail || 'Failed to upload document.');
+      // Fast API 422 errors detail is often an array or object, which crashes React
+      const detail = err.response?.data?.detail;
+      let errorMsg = 'Failed to upload document.';
+      if (typeof detail === 'string') {
+        errorMsg = detail;
+      } else if (Array.isArray(detail) && detail.length > 0) {
+         errorMsg = detail[0].msg || JSON.stringify(detail);
+      } else if (typeof detail === 'object' && detail !== null) {
+         errorMsg = JSON.stringify(detail);
+      }
+      setError(errorMsg);
       setUploadProgress('');
     } finally {
       setIsUploading(false);
